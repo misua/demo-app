@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/misua/eks-with-otel/demo-app/internal/handlers"
 	"github.com/misua/eks-with-otel/demo-app/internal/middleware"
 	"github.com/misua/eks-with-otel/demo-app/internal/storage"
+	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
@@ -75,6 +77,29 @@ func main() {
 			"service": serviceName,
 			"version": serviceVersion,
 			"status":  "running",
+		})
+	})
+
+	// New route for logging with pod name and tracing
+	router.GET("/log-with-pod", func(c *gin.Context) {
+		// Get pod name from environment variable
+		podName := getEnv("HOSTNAME", "unknown-pod")
+		
+		// Create a log message with pod name
+		logMessage := fmt.Sprintf("I WAS CALLED BY POD %s", podName)
+		
+		// Log to Loki with structured fields including trace information
+		logger.WithFields(logrus.Fields{
+			"message": logMessage,
+			"pod":     podName,
+			"route":   "/log-with-pod",
+		}).Info(logMessage)
+		
+		// Return response with pod information
+		c.JSON(http.StatusOK, gin.H{
+			"message": logMessage,
+			"pod":     podName,
+			"status":  "logged",
 		})
 	})
 
