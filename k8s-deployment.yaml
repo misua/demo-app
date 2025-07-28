@@ -23,7 +23,7 @@ spec:
         env:
         # This is the KEY difference - uses Kubernetes service DNS
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "otel-collector.tracing.svc.cluster.local:4318"
+          value: "otel-collector-opentelemetry-collector.tracing.svc.cluster.local:4318"
         - name: PORT
           value: "8080"
         - name: OTEL_SERVICE_NAME
